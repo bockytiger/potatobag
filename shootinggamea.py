@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 わり算シューティング（WebAssembly対応・完全版）
 元の完成版仕様：
@@ -11,7 +10,7 @@
 import pygame
 import random
 import math
-import sys
+import asyncio
 
 pygame.init()
 
@@ -20,8 +19,9 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED)
 pygame.display.set_caption("わり算シューティング")
 clock = pygame.time.Clock()
 
-FONT = pygame.font.SysFont("meiryo", 22)
-BIGFONT = pygame.font.SysFont("meiryo", 40)
+# Pygbag対応: None指定でデフォルトフォントを使用
+FONT = pygame.font.Font(None, 32)
+BIGFONT = pygame.font.Font(None, 56)
 
 TARGET_CORRECT = 20
 FALL_SPEED_MIN = 60
@@ -200,13 +200,13 @@ class Game:
         surf.fill((10,15,40))
 
         if self.state == "menu":
-            t = BIGFONT.render("わり算シューティング", True, (255,240,200))
+            t = BIGFONT.render("Division Shooting", True, (255,240,200))
             surf.blit(t, (WIDTH//2 - t.get_width()//2, 200))
-            surf.blit(FONT.render("クリックでスタート", True, (220,220,220)), (WIDTH//2 - 80, 280))
+            surf.blit(FONT.render("Click to Start", True, (220,220,220)), (WIDTH//2 - 100, 280))
             return
 
         if self.state == "level_clear":
-            t = BIGFONT.render("レベルクリア！", True, (255,230,160))
+            t = BIGFONT.render("Level Clear!", True, (255,230,160))
             surf.blit(t, (WIDTH//2 - t.get_width()//2, HEIGHT//2 - 40))
             return
 
@@ -222,36 +222,42 @@ class Game:
             p.draw(surf)
 
         d, s, _ = self.current_question
-        surf.blit(BIGFONT.render(f"{d} ÷ {s} = ?", True, (255,255,200)), (20,20))
-        surf.blit(FONT.render(f"{self.correct_count}/{TARGET_CORRECT} 正解", True, (255,255,255)), (20, 70))
+        surf.blit(BIGFONT.render(f"{d} / {s} = ?", True, (255,255,200)), (20,20))
+        surf.blit(FONT.render(f"{self.correct_count}/{TARGET_CORRECT} Correct", True, (255,255,255)), (20, 70))
 
 
-game = Game()
-pygame.mouse.set_visible(True)
+# --- メインループ（asyncio対応） ---
+async def main():
+    game = Game()
+    pygame.mouse.set_visible(True)
+    
+    running = True
+    while running:
+        dt = clock.tick(60) / 1000
 
-running = True
-while running:
-    dt = clock.tick(60) / 1000
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+            elif event.type == pygame.MOUSEMOTION:
+                if game.state == "playing":
+                    game.ship_x = clamp(event.pos[0], 40, WIDTH-40)
 
-        elif event.type == pygame.MOUSEMOTION:
-            if game.state == "playing":
-                game.ship_x = clamp(event.pos[0], 40, WIDTH-40)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if game.state == "menu":
+                    game.state = "playing"
+                elif game.state == "level_clear":
+                    game.reset_play()
+                    game.state = "playing"
+                else:
+                    game.fire()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if game.state == "menu":
-                game.state = "playing"
-            elif game.state == "level_clear":
-                game.reset_play()
-                game.state = "playing"
-            else:
-                game.fire()
+        game.update(dt)
+        game.draw(screen)
+        pygame.display.flip()
+        
+        # Pygbag対応: ブラウザに制御を戻す
+        await asyncio.sleep(0)
 
-    game.update(dt)
-    game.draw(screen)
-    pygame.display.flip()
-
-pygame.quit()
+# Pygbag対応: asyncioで起動
+asyncio.run(main())
