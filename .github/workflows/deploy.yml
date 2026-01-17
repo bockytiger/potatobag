@@ -26,16 +26,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build/web
-```
-4. 「Commit new file」をクリック
-
-### 最終的なフォルダ構造:
-```
-potatobag/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml  ← これを作成
-├── main.py             ← これを作成
-├── shootinggamea.py    ← 既に修正済み
-├── index.html
-└── favicon.png
