@@ -259,5 +259,4 @@ async def main():
         # Pygbag対応: ブラウザに制御を戻す
         await asyncio.sleep(0)
 
-# Pygbag対応: asyncioで起動
-asyncio.run(main())
+
