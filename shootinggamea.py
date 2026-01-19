@@ -1,12 +1,3 @@
-"""
-わり算シューティング（WebAssembly対応・完全版）
-元の完成版仕様：
-・難易度3段階
-・20問正解でレベルクリア
-・メニュー画面、レベルクリア画面あり
-・エフェクトあり
-"""
-
 import pygame
 import random
 import math
@@ -225,7 +216,6 @@ class Game:
         surf.blit(BIGFONT.render(f"{d} / {s} = ?", True, (255,255,200)), (20,20))
         surf.blit(FONT.render(f"{self.correct_count}/{TARGET_CORRECT} Correct", True, (255,255,255)), (20, 70))
 
-
 # --- メインループ（asyncio対応） ---
 async def main():
     game = Game()
@@ -258,3 +248,8 @@ async def main():
         
         # Pygbag対応: ブラウザに制御を戻す
         await asyncio.sleep(0)
+
+# ★★★ これが無いとゲームが起動しません ★★★
+if __name__ == "__main__":
+    asyncio.run(main())
+
